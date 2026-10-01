@@ -31,6 +31,7 @@ DEFAULT_VENDOR = "Royal Grace"   # для товаров без g:brand
 DEFAULT_QTY = 10           # в Google-фиде нет остатков -> ставим фикс. значение
 CURRENCY = "UAH"
 CATEGORY_ID_START = 1001   # id для создаваемых категорий
+PRICE_MARKUP = 1.22
 # -------------------------------------------
 
 G = "{http://base.google.com/ns/1.0}"
@@ -51,9 +52,12 @@ def clean_id(raw):
 
 
 def parse_price(raw):
-    """'7505 UAH' -> '7505'."""
-    m = re.search(r"[\d]+(?:[.,]\d+)?", raw or "")
-    return m.group(0).replace(",", ".") if m else "0"
+    """'7505 UAH' -> '9156' (с наценкой, округление до целого)."""
+    m = re.search(r"\d+(?:[.,]\d+)?", raw or "")
+    if not m:
+        return "0"
+    price = float(m.group(0).replace(",", ".")) * PRICE_MARKUP
+    return str(int(price + 0.5))
 
 
 def description_html(title, text):
